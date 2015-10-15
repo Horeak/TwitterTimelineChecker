@@ -1,5 +1,6 @@
 package Main;
 
+import File.MixedEncryption;
 import Utils.Misc.SpringUtilities;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
@@ -7,7 +8,6 @@ import twitter4j.TwitterFactory;
 import twitter4j.auth.AccessToken;
 import twitter4j.auth.RequestToken;
 import twitter4j.conf.ConfigurationBuilder;
-import File.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -159,8 +159,9 @@ public class TwitterAccess
 		if(file.exists()){
 			try {
 
-				file.delete();
-				file.createNewFile();
+				PrintWriter writer = new PrintWriter(file);
+				writer.print("");
+				writer.close();
 
 			} catch (IOException e) {
 				e.printStackTrace();
