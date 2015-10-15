@@ -1,8 +1,9 @@
 package Utils.Status;
 
+import Main.MainTwitter;
+import Utils.Action.ActionUtils;
 import Utils.Action.Actions;
 import Utils.TimelineCheckerObject;
-import org.apache.commons.lang3.StringUtils;
 import twitter4j.ResponseList;
 import twitter4j.Status;
 import twitter4j.Twitter;
@@ -53,21 +54,35 @@ public class StatusHandler {
 			return actionses;
 	}
 
-	public static void performActions(TimelineCheckerObject timelineCheckerObject, Status status, Twitter twitter) throws  Exception{
-		for (Actions act : timelineCheckerObject.getActions()) {
-			if (act != null) {
-				if (act.name().equalsIgnoreCase(Actions.FAVORITE.name())) {
+	public static void performManualCheck(TimelineCheckerObject object){
+		System.out.println("Performing manual check on rule: " + object.getName());
 
-					if (!status.isFavorited())
-						twitter.createFavorite(status.getId());
+		try {
+			if(object.isSpecificUser()){
+			for (Status stat : getTimelineFromUserAndDate(object, MainTwitter.twitter)) {
+				if (StatusHandler.validStatus(stat, object)) {
 
-				} else if (act.name().equalsIgnoreCase(Actions.RETWEET.name())) {
+					if (object.isNotifyUser())
+						MainTwitter.twitter.sendDirectMessage(object.getIdToNotify(), MessageFormatter.notifyStringFormat(object, stat));
 
-					if (!status.isRetweeted())
-						twitter.retweetStatus(status.getId());
+					ActionUtils.performActions(object, stat, MainTwitter.twitter);
 
 				}
 			}
+			}else{
+				for (Status stat : MainTwitter.twitter.getHomeTimeline()) {
+					if (StatusHandler.validStatus(stat, object)) {
+
+						if (object.isNotifyUser())
+							MainTwitter.twitter.sendDirectMessage(object.getIdToNotify(), MessageFormatter.notifyStringFormat(object, stat));
+
+						ActionUtils.performActions(object, stat, MainTwitter.twitter);
+
+					}
+				}
+			}
+		}catch (Exception e){
+			e.printStackTrace();
 		}
 	}
 
@@ -101,8 +116,9 @@ public class StatusHandler {
 	public static boolean validStatus(Status stat, TimelineCheckerObject timelineChecker){
 		boolean bool = true;
 
+		if(!timelineChecker.isSpecificUser() || timelineChecker.isSpecificUser() && timelineChecker.getUserTimeLineID().equals(stat.getUser().getScreenName()))
 		if(hasFavorite(timelineChecker, stat) || hasRetweet(timelineChecker, stat)) {
-			if (!stat.isRetweet()) {
+			if (!stat.isRetweet() && stat.getInReplyToScreenName() == null) {
 				boolean fav = false, re = false;
 
 				for (Actions act : timelineChecker.getActions()) {
@@ -122,7 +138,7 @@ public class StatusHandler {
 									String[] ttt = tg.split("\\&\\&");
 
 									for (String tgg : ttt) {
-										bool = StringUtils.containsIgnoreCase(stat.getText(), tgg);
+										bool = stat.getText().toLowerCase().contains(tgg.toLowerCase());
 									}
 
 									if (bool) {
@@ -132,7 +148,7 @@ public class StatusHandler {
 									}
 
 								} else {
-									bool = StringUtils.containsIgnoreCase(stat.getText(), tg);
+									bool = stat.getText().toLowerCase().contains(tg.toLowerCase());
 									if (bool) {
 										return true;
 									}
@@ -144,7 +160,7 @@ public class StatusHandler {
 								String[] ttt = text.split("\\&\\&");
 
 								for (String tgg : ttt) {
-									bool = StringUtils.containsIgnoreCase(stat.getText(), tgg);
+									bool = stat.getText().toLowerCase().contains(tgg.toLowerCase());
 								}
 
 								if (bool) {
@@ -152,7 +168,7 @@ public class StatusHandler {
 								}
 
 							} else {
-								return StringUtils.containsIgnoreCase(stat.getText(), text);
+								return stat.getText().toLowerCase().contains(text.toLowerCase());
 							}
 						}
 					}

@@ -1,6 +1,5 @@
 package Main;
 
-import Encrytable.Types.EncrytableString;
 import Utils.Misc.SpringUtilities;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
@@ -8,6 +7,7 @@ import twitter4j.TwitterFactory;
 import twitter4j.auth.AccessToken;
 import twitter4j.auth.RequestToken;
 import twitter4j.conf.ConfigurationBuilder;
+import File.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -101,7 +101,7 @@ public class TwitterAccess
 
 		try {
 		if(hasToken()){
-				FileReader fileReader =new FileReader(file);
+				FileReader fileReader = new FileReader(file);
 				BufferedReader bufferedReader = new BufferedReader(fileReader);
 
 				while((line = bufferedReader.readLine()) != null) {
@@ -109,13 +109,13 @@ public class TwitterAccess
 
 					boolean checkAT = false, checkAS = false;
 					for(String x : xx){
-						String tmp = EncrytableString.staticReference.decryptObject(x);
+						String tmp = MixedEncryption.staticReference.DecryptObject(x);
 
 						if(tmp.equalsIgnoreCase("AT") && !checkAT){
 							checkAT = true;
 							continue;
 						}else if(checkAT){
-							AT = EncrytableString.staticReference.decryptObject(x);
+							AT = MixedEncryption.staticReference.DecryptObject(x);
 							checkAT = false;
 						}
 
@@ -124,7 +124,7 @@ public class TwitterAccess
 							checkAS = true;
 							continue;
 						}else if(checkAS){
-							AS = EncrytableString.staticReference.decryptObject(x);
+							AS = MixedEncryption.staticReference.DecryptObject(x);
 							checkAS = false;
 						}
 					}
@@ -148,9 +148,23 @@ public class TwitterAccess
 
 	public static void validateTokenStore(){
 		if(!hasToken()){
-			file.delete();
+			invalidateTokenStore();
+		}
+	}
 
-			System.out.println("Token store was invalidated!");
+
+	public static void invalidateTokenStore(){
+		System.out.println("Invalidating token store!");
+
+		if(file.exists()){
+			try {
+
+				file.delete();
+				file.createNewFile();
+
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -175,13 +189,13 @@ public class TwitterAccess
 				boolean check = false;
 
 				for(String x : tgg){
-					String tmp = EncrytableString.staticReference.decryptObject(x);
+					String tmp = MixedEncryption.staticReference.DecryptObject(x);
 
 					if(tmp.equalsIgnoreCase("DD") && !check){
 						check = true;
 						continue;
 					}else if(check){
-						Date created = dateFormat.parse(EncrytableString.staticReference.decryptObject(x));
+						Date created = dateFormat.parse(MixedEncryption.staticReference.DecryptObject(x));
 						Date now = new Date();
 
 						long diff = (now.getTime() - created.getTime());
@@ -218,15 +232,15 @@ public class TwitterAccess
 
 			for(String t : tmp.split("")){
 				if(t.equalsIgnoreCase("1")){
-					bufferedWriter.write(EncrytableString.staticReference.encryptObject("DD") + "-" + EncrytableString.staticReference.encryptObject(dateFormat.format(date)));
+					bufferedWriter.write(MixedEncryption.staticReference.EncryptObject("DD") + "-" + MixedEncryption.staticReference.EncryptObject(dateFormat.format(date)));
 					bufferedWriter.newLine();
 
 				}else if(t.equalsIgnoreCase("2")){
-					bufferedWriter.write(EncrytableString.staticReference.encryptObject("AT") + "-" + EncrytableString.staticReference.encryptObject(token.getToken()));
+					bufferedWriter.write(MixedEncryption.staticReference.EncryptObject("AT") + "-" + MixedEncryption.staticReference.EncryptObject(token.getToken()));
 					bufferedWriter.newLine();
 
 				}else if(t.equalsIgnoreCase("3")){
-					bufferedWriter.write(EncrytableString.staticReference.encryptObject("AS") + "-" + EncrytableString.staticReference.encryptObject(token.getTokenSecret()));
+					bufferedWriter.write(MixedEncryption.staticReference.EncryptObject("AS") + "-" + MixedEncryption.staticReference.EncryptObject(token.getTokenSecret()));
 					bufferedWriter.newLine();
 				}
 			}

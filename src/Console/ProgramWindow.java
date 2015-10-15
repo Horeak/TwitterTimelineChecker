@@ -4,6 +4,7 @@ import Main.MainTwitter;
 import Utils.Action.Actions;
 import Utils.Misc.SpringUtilities;
 import Utils.Misc.WrapLayout;
+import Utils.Status.StatusHandler;
 import Utils.TimelineCheckerObject;
 
 import javax.swing.*;
@@ -12,13 +13,11 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.PrintStream;
-import java.util.concurrent.TimeUnit;
 
 public class ProgramWindow extends JPanel {
 
 	private JTextPane textArea = new JTextPane();
 	private ConsolePrintStream taOutputStream = new ConsolePrintStream(textArea);
-	public static JProgressBar prog = new JProgressBar(JProgressBar.VERTICAL,0, (int)TimeUnit.MINUTES.toMillis(1));
 	public static PrintStream stream = System.out;
 
 	public ProgramWindow() {
@@ -39,29 +38,6 @@ public class ProgramWindow extends JPanel {
 		add(new JScrollPane(textArea, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED));
 		System.setOut(taOutputStream);
 
-		JButton settings = new JButton("Settings");
-		settings.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				JPanel panel = new JPanel();
-				panel.setLayout(new SpringLayout());
-
-				SpringUtilities.makeCompactGrid(panel, 0, 2, 6, 6, 6, 6);
-
-				int result = JOptionPane.showConfirmDialog(null, panel, "Settings", JOptionPane.OK_CANCEL_OPTION);
-				if (result == JOptionPane.OK_OPTION) {
-				}
-			}
-		});
-
-		add(settings, BorderLayout.SOUTH);
-
-		prog.setMinimum(0);
-		prog.setMaximum((int)TimeUnit.MINUTES.toMillis(1));
-		prog.setStringPainted(true);
-
-		add(prog, BorderLayout.LINE_END);
-
 
 	}
 
@@ -70,7 +46,7 @@ public class ProgramWindow extends JPanel {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setPreferredSize(new Dimension(600, 500));
 		frame.add(new ProgramWindow(), BorderLayout.NORTH);
-		frame.add(new buttonArea(), BorderLayout.WEST);
+		frame.add(new buttonArea().getScrollPane(), BorderLayout.WEST);
 
 		frame.pack();
 		frame.setLocationRelativeTo(null);
@@ -80,7 +56,7 @@ public class ProgramWindow extends JPanel {
 
 }
 
-class buttonArea extends JPanel{
+class buttonArea{
 
 	public static JPanel panel = new JPanel();
 	public static JScrollPane scrollPane = new JScrollPane(panel, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -94,10 +70,15 @@ class buttonArea extends JPanel{
 		addButtons();
 	}
 
+	public JScrollPane getScrollPane(){
+		return scrollPane;
+	}
+
 	public void addButton(TimelineCheckerObject object){
 		JButton button = new JButton(object.getName());
 		button.setPreferredSize(buttonSize);
 
+		//Edit menu
 		button.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -113,6 +94,20 @@ class buttonArea extends JPanel{
 				panelX.add(lName);
 				lName.setLabelFor(nameField);
 				panelX.add(nameField);
+
+				JCheckBox specificUser = new JCheckBox();
+				JLabel lSpecificUser = new JLabel("Specific user: ", JLabel.TRAILING);
+				panelX.add(lSpecificUser);
+				lSpecificUser.setLabelFor(specificUser);
+				panelX.add(specificUser);
+
+				userNameID.setEditable(false);
+				specificUser.addActionListener(new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						userNameID.setEditable(specificUser.isSelected());
+					}
+				});
 
 				JLabel lUserName = new JLabel("User id for timeline: @", JLabel.TRAILING);
 				panelX.add(lUserName);
@@ -183,7 +178,22 @@ class buttonArea extends JPanel{
 				panelX.add(delete);
 
 
-				SpringUtilities.makeCompactGrid(panelX, 11, 2, 6, 6, 6, 6);
+				JButton manualUpdate = new JButton("Manual check");
+
+				manualUpdate.addActionListener(new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						StatusHandler.performManualCheck(object);
+					}
+				});
+
+				JLabel lManualCheck = new JLabel("", JLabel.TRAILING);
+				panelX.add(lManualCheck);
+				lDelete.setLabelFor(manualUpdate);
+				panelX.add(manualUpdate);
+
+
+				SpringUtilities.makeCompactGrid(panelX, 13, 2, 6, 6, 6, 6);
 
 				nameField.setText(object.getName());
 				userNameID.setText(object.getUserTimeLineID());
@@ -222,7 +232,7 @@ class buttonArea extends JPanel{
 
 					MainTwitter.timelineCheckers.remove(object);
 
-					TimelineCheckerObject object = new TimelineCheckerObject(name, id, textToChecked, Hours, notfUser, idToNotify.getText(), act);
+					TimelineCheckerObject object = new TimelineCheckerObject(name, specificUser.isSelected(), id, textToChecked, Hours, notfUser, idToNotify.getText(), act);
 					MainTwitter.timelineCheckers.add(object);
 
 					addButton(object);
@@ -232,6 +242,8 @@ class buttonArea extends JPanel{
 				}
 			}
 		});
+
+		StatusHandler.performManualCheck(object);
 
 		panel.add(button);
 		scrollPane.validate();
@@ -246,6 +258,7 @@ class buttonArea extends JPanel{
 		JButton button = new JButton("Add new rule");
 		button.setPreferredSize(buttonSize);
 
+		//Add rule menu
 		button.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -259,6 +272,20 @@ class buttonArea extends JPanel{
 
 				JLabel lName = new JLabel("Name: ", JLabel.TRAILING); panel.add(lName); lName.setLabelFor(nameField);
 				panel.add(nameField);
+
+				JCheckBox specificUser = new JCheckBox();
+				JLabel lSpecificUser = new JLabel("Specific user: ", JLabel.TRAILING);
+				panel.add(lSpecificUser);
+				lSpecificUser.setLabelFor(specificUser);
+				panel.add(specificUser);
+
+				userNameID.setEditable(false);
+				specificUser.addActionListener(new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						userNameID.setEditable(specificUser.isSelected());
+					}
+				});
 
 				JLabel lUserName = new JLabel("User id for timeline: @", JLabel.TRAILING); panel.add(lUserName); lUserName.setLabelFor(userNameID);
 				panel.add(userNameID);
@@ -294,7 +321,7 @@ class buttonArea extends JPanel{
 				panel.add(favorite);
 
 
-				SpringUtilities.makeCompactGrid(panel, 10, 2, 6, 6, 6, 6);
+				SpringUtilities.makeCompactGrid(panel, 11, 2, 6, 6, 6, 6);
 
 				int result = JOptionPane.showConfirmDialog(null, panel, "Add new rule", JOptionPane.OK_CANCEL_OPTION);
 				if (result == JOptionPane.OK_OPTION) {
@@ -309,7 +336,7 @@ class buttonArea extends JPanel{
 
 					Actions[] act = new Actions[]{retw ? Actions.RETWEET : null, fav ? Actions.FAVORITE : null};
 
-					TimelineCheckerObject object = new TimelineCheckerObject(name, id , textToChecked, Hours, notfUser, idToNotify.getText(), act);
+					TimelineCheckerObject object = new TimelineCheckerObject(name, specificUser.isSelected(), id , textToChecked, Hours, notfUser, idToNotify.getText(), act);
 					MainTwitter.timelineCheckers.add(object);
 					addButton(object);
 
@@ -318,7 +345,7 @@ class buttonArea extends JPanel{
 		});
 
 		panel.add(button);
-		add(scrollPane);
+		scrollPane.validate();
 	}
 
 

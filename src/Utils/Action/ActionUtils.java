@@ -1,5 +1,7 @@
 package Utils.Action;
 
+import Utils.MessageFormatter;
+import Utils.Status.StatusHandler;
 import Utils.TimelineCheckerObject;
 import twitter4j.Status;
 import twitter4j.Twitter;
@@ -28,21 +30,13 @@ public class ActionUtils {
 	}
 
 	public static void performActions(TimelineCheckerObject timelineCheckerObject, Status status, Twitter twitter) throws  Exception{
-		for (Actions act : timelineCheckerObject.getActions()) {
-			if (act != null) {
-				if (act.name().equalsIgnoreCase(Actions.FAVORITE.name())) {
+			if (StatusHandler.hasFavorite(timelineCheckerObject, status) && !status.isFavorited())
+				twitter.createFavorite(status.getId());
 
-					if (!status.isFavorited())
-						twitter.createFavorite(status.getId());
+			if (StatusHandler.hasRetweet(timelineCheckerObject, status) && !status.isRetweeted())
+				twitter.retweetStatus(status.getId());
 
-				} else if (act.name().equalsIgnoreCase(Actions.RETWEET.name())) {
-
-					if (!status.isRetweeted())
-						twitter.retweetStatus(status.getId());
-
-				}
-			}
-		}
+		System.out.println(MessageFormatter.notifyStringFormat(timelineCheckerObject, status));
 	}
 
 }

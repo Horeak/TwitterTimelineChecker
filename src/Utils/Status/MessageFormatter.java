@@ -12,25 +12,18 @@ public class MessageFormatter {
 
 	public static String notifyStringFormat(TimelineCheckerObject checkerObject, Status status) {
 		StringBuilder builder = new StringBuilder();
-		builder.append("#####\n");
+		builder.append("\n");
 		builder.append(status.getUser().getScreenName() + "\n-----------------\n");
 		builder.append(status.getText() + "\n");
 		builder.append("\n- " + new Date().toString() + ": ");
 
-		boolean t = false;
-		for(Actions act : StatusHandler.getActions(checkerObject, status)){
-			if(act != null) {
-				builder.append(act.name() + (t ? ", " : ""));
-				t = true;
-			}
-		}
+		builder.append((StatusHandler.hasFavorite(checkerObject, status) ? Actions.FAVORITE.name() : "") + (StatusHandler.hasFavorite(checkerObject, status) && StatusHandler.hasRetweet(checkerObject, status) ? ", " : "") + (StatusHandler.hasRetweet(checkerObject, status) ? Actions.RETWEET.name() : ""));
 
 		return builder.toString();
 	}
 
 	public static String formatOutgoingLogMessage(String text){
 		DateFormat dateFormat = new SimpleDateFormat("[HH:mm:ss]");
-
 
 		return dateFormat.format(new Date()) + text;
 	}
