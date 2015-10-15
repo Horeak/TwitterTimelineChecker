@@ -146,8 +146,38 @@ public class TwitterAccess
 		return null;
 	}
 
+
+	public static boolean hasFile() {
+
+		try {
+			if (file.exists()) {
+				FileReader fileReader = new FileReader(file);
+				BufferedReader bufferedReader = new BufferedReader(fileReader);
+
+				String line = null;
+
+				while ((line = bufferedReader.readLine()) != null) {
+					String[] tgg = line.split("\\-");
+
+					for(String x : tgg){
+						String tmp = MixedEncryption.staticReference.DecryptObject(x);
+
+						if(tmp.equalsIgnoreCase("DD")){
+							return true;
+						}
+					}
+				}
+			}
+
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+
+		return false;
+	}
+
 	public static void validateTokenStore(){
-		if(!hasToken()){
+		if(!hasToken() && hasFile()){
 			invalidateTokenStore();
 		}
 	}
