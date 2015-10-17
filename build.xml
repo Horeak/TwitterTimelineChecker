@@ -2,16 +2,20 @@
    <target name="init">
       <property name="sourceDir" value="src"/>
       <property name="outputDir" value="classes" />
+	  <property name="libs" value="lib" />
    </target>
    <target name="clean" depends="init">
       <deltree dir="${outputDir}" />
+	  <deltree dir="${sourceDir}/lib" />
    </target>
    <target name="prepare" depends="clean">
       <mkdir dir="${outputDir}" />
+	  <copydir src="${libs}" dest="${sourceDir}"
    </target>
    <target name="compile" depends="prepare">
      <javac srcdir="${sourceDir}" destdir="${outputDir}" />
    </target>
     <target name="test" depends="compile">
+		  <deltree dir="${sourceDir}/lib" />
 	</target>
 </project>
