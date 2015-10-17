@@ -1,28 +1,71 @@
-<project name="simpleCompile" default="compile" basedir=".">
+<project xmlns:ivy="antlib:org.apache.ivy.ant" basedir="." default="test">
 
-  <dependencies>
-	<dependency groupId="org.twitter4j" artifactId="twitter4j-core" version="4.0.4" scope="release"/>
-	<dependency groupId="org.twitter4j" artifactId="twitter4j-stream" version="4.0.4" scope="release"/>
-	<dependency groupId="org.twitter4j" artifactId="twitter4j-async" version="4.0.4" scope="release"/>
-	<dependency groupId="org.twitter4j" artifactId="twitter4j-media-support" version="4.0.4" scope="release"/>
-	<dependency groupId="org.twitter4j" artifactId="twitter4j-examples" version="4.0.4" scope="release"/>
-	<dependency groupId="org.apache.commons" artifactId="commons-lang3" version="3.0.1" scope="release"/>
-</dependencies>
+<path id="build.classpath">
+  <fileset dir="lib">
+    <include name="**/*.jar"/>
+    <include name="**/*.zip"/>
+  </fileset>
+  <fileset dir="lLibs">
+    <include name="**/*.jar"/>
+    <include name="**/*.zip"/>
+  </fileset>
+</path>
 
-   <target name="init">
+   <target name="init" depends="resolve">
       <property name="sourceDir" value="src"/>
       <property name="outputDir" value="classes" />
+	  <property name="outputDirJar" value="output" />
    </target>
+   
    <target name="clean" depends="init">
       <deltree dir="${outputDir}" />
+	  <deltree dir="${outputDirJar}" />
    </target>
+   
    <target name="prepare" depends="clean">
-      <mkdir dir="${outputDir}" />
-	  <copydir src="${libs}" dest="${sourceDir}"/>
+    <mkdir dir="${outputDir}" />
+	<mkdir dir="${outputDirJar}" />
    </target>
+   
    <target name="compile" depends="prepare">
-     <javac srcdir="${sourceDir}" destdir="${outputDir}" />
-   </target>
+	<javac destdir="${outputDir}">
+		<src path="${sourceDir}"/>
+		<classpath refid="build.classpath"/>
+	</javac>
+	
+	<jar destfile = "${outputDirJar}/JavaTwitter.jar" basedir = "${outputDir}">
+   
+	<zipgroupfileset dir="lib" includes="*.jar"/>
+   
+   <manifest>
+      <attribute name="Main-Class" value="Main.MainTwitter"/>
+	  <attribute name="Class-Path" value="build.classpath"/>
+   </manifest>
+   </jar>
+   
+	 <deltree dir="${outputDir}" />
+</target>
+   
+   
+   
+   <!-- Used to start build with travis CI -->
     <target name="test" depends="compile">
+	</target>	
+	
+	
+	<!-- ivy start -->
+	<!-- ivy to get dependencies and copy to project lib folder automatically -->
+	<target name="resolve" description="retrieve dependencies with ivy" depends="ivy">
+		<ivy:resolve  />
+		<ivy:retrieve sync="true" type="jar"/>
 	</target>
+
+	<!-- install ivy -->
+	<target name="ivy" description="Install ivy">
+		<mkdir dir="${user.home}/.ant/lib" />
+		<get dest="${user.home}/.ant/lib/ivy.jar" 
+			src="http://search.maven.org/remotecontent?filepath=org/apache/ivy/ivy/2.4.0-rc1/ivy-2.4.0-rc1.jar" />
+	</target>
+	<!-- ivy end -->
+	
 </project>

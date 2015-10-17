@@ -14,3 +14,7 @@ hs_err_pid*
 src/temp/META-INF/
 
 *.mf
+
+/lib
+/classes
+/lLibs
