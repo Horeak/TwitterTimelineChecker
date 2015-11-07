@@ -10,7 +10,7 @@ import java.util.Date;
 
 public class MessageFormatter {
 
-	public static String notifyStringFormat(TimelineCheckerObject checkerObject, Status status) {
+	public static String notifyStringFormat( TimelineCheckerObject checkerObject, Status status ) {
 		StringBuilder builder = new StringBuilder();
 		builder.append("\n");
 		builder.append(status.getUser().getScreenName() + "\n-----------------\n");
@@ -22,7 +22,7 @@ public class MessageFormatter {
 		return builder.toString();
 	}
 
-	public static String formatOutgoingLogMessage(String text){
+	public static String formatOutgoingLogMessage( String text ) {
 		DateFormat dateFormat = new SimpleDateFormat("[HH:mm:ss]");
 
 		return dateFormat.format(new Date()) + text;

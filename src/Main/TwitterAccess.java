@@ -1,6 +1,6 @@
 package Main;
 
-import File.MixedEncryption;
+import File.PasswordBasedEncryption.SecureEncryption;
 import Utils.Misc.SpringUtilities;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
@@ -20,17 +20,15 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-public class TwitterAccess
-{
+public class TwitterAccess {
+	private static File file = new File("tokens.store");
+	private static DateFormat dateFormat = new SimpleDateFormat("HH.mm.ss dd:MM:yyyy");
+
 	public static void getAccess() throws IOException, TwitterException {
 
-		if(!hasToken()) {
+		if (!hasToken()) {
 			ConfigurationBuilder cb = new ConfigurationBuilder();
-			cb.setDebugEnabled(true)
-					.setOAuthConsumerKey("AO0FNLxpCLdwqQhavavEts9IB")
-					.setOAuthConsumerSecret("RSswQRqpxxbQpV54YIG90Z6FYrqF7XLMjs2vv73UDNJ2Awn0DD")
-					.setOAuthAccessToken(null)
-					.setOAuthAccessTokenSecret(null);
+			cb.setDebugEnabled(true).setOAuthConsumerKey("AO0FNLxpCLdwqQhavavEts9IB").setOAuthConsumerSecret("RSswQRqpxxbQpV54YIG90Z6FYrqF7XLMjs2vv73UDNJ2Awn0DD").setOAuthAccessToken(null).setOAuthAccessTokenSecret(null);
 
 			TwitterFactory tf = new TwitterFactory(cb.build());
 			Twitter twitter = tf.getInstance();
@@ -71,7 +69,7 @@ public class TwitterAccess
 		}
 	}
 
-	private static String openAutorizeWindow(){
+	private static String openAutorizeWindow() {
 		JPanel panel = new JPanel();
 		panel.setLayout(new SpringLayout());
 
@@ -95,36 +93,35 @@ public class TwitterAccess
 		return null;
 	}
 
-
-	public static AccessToken loadAccessToken(){
+	public static AccessToken loadAccessToken() {
 		String line, AT = null, AS = null;
 
 		try {
-		if(hasToken()){
+			if (hasToken()) {
 				FileReader fileReader = new FileReader(file);
 				BufferedReader bufferedReader = new BufferedReader(fileReader);
 
-				while((line = bufferedReader.readLine()) != null) {
+				while ((line = bufferedReader.readLine()) != null) {
 					String[] xx = line.split("\\-");
 
 					boolean checkAT = false, checkAS = false;
-					for(String x : xx){
-						String tmp = MixedEncryption.staticReference.DecryptObject(x);
+					for (String x : xx) {
+						String tmp = SecureEncryption.staticReference.DecryptObject(x);
 
-						if(tmp.equalsIgnoreCase("AT") && !checkAT){
+						if (tmp.equalsIgnoreCase("AT") && !checkAT) {
 							checkAT = true;
 							continue;
-						}else if(checkAT){
-							AT = MixedEncryption.staticReference.DecryptObject(x);
+						} else if (checkAT) {
+							AT = SecureEncryption.staticReference.DecryptObject(x);
 							checkAT = false;
 						}
 
 
-						if(tmp.equalsIgnoreCase("AS") && !checkAS){
+						if (tmp.equalsIgnoreCase("AS") && !checkAS) {
 							checkAS = true;
 							continue;
-						}else if(checkAS){
-							AS = MixedEncryption.staticReference.DecryptObject(x);
+						} else if (checkAS) {
+							AS = SecureEncryption.staticReference.DecryptObject(x);
 							checkAS = false;
 						}
 					}
@@ -133,24 +130,44 @@ public class TwitterAccess
 
 				bufferedReader.close();
 
-				if(AS != null && AT != null)
-				return new AccessToken(AT, AS);
+				if (AS != null && AT != null) return new AccessToken(AT, AS);
 
-			}else{
+			} else {
 				file.createNewFile();
 			}
-		}catch (Exception e){
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
 		return null;
 	}
 
+	public static boolean isFileEmpty() {
+		try {
+			FileReader fileReader = new FileReader(file);
+			BufferedReader bufferedReader = new BufferedReader(fileReader);
+
+			String line = null;
+
+			while ((line = bufferedReader.readLine()) != null) {
+				if (line != null && !line.isEmpty()) {
+					return false;
+				}
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+
+		return true;
+
+	}
 
 	public static boolean hasFile() {
 
 		try {
-			if (file.exists()) {
+			if (file.exists() && !isFileEmpty()) {
 				FileReader fileReader = new FileReader(file);
 				BufferedReader bufferedReader = new BufferedReader(fileReader);
 
@@ -159,34 +176,33 @@ public class TwitterAccess
 				while ((line = bufferedReader.readLine()) != null) {
 					String[] tgg = line.split("\\-");
 
-					for(String x : tgg){
-						String tmp = MixedEncryption.staticReference.DecryptObject(x);
+					for (String x : tgg) {
+						String tmp = SecureEncryption.staticReference.DecryptObject(x);
 
-						if(tmp.equalsIgnoreCase("DD")){
+						if (tmp.equalsIgnoreCase("DD")) {
 							return true;
 						}
 					}
 				}
 			}
 
-		}catch(Exception e){
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
 		return false;
 	}
 
-	public static void validateTokenStore(){
-		if(!hasToken() && hasFile()){
+	public static void validateTokenStore() {
+		if (!hasToken() && hasFile()) {
 			invalidateTokenStore();
 		}
 	}
 
-
-	public static void invalidateTokenStore(){
+	public static void invalidateTokenStore() {
 		System.out.println("Invalidating token store!");
 
-		if(file.exists()){
+		if (file.exists()) {
 			try {
 
 				PrintWriter writer = new PrintWriter(file);
@@ -199,34 +215,32 @@ public class TwitterAccess
 		}
 	}
 
-	public static boolean hasToken(){
+	public static boolean hasToken() {
 		String line = null;
 		boolean tg = false;
 
-		if(!file.exists())
-			try {
-				file.createNewFile();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+		if (!file.exists()) try {
+			file.createNewFile();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 
 		try {
-			FileReader fileReader =new FileReader(file);
+			FileReader fileReader = new FileReader(file);
 			BufferedReader bufferedReader = new BufferedReader(fileReader);
 
-			while((line = bufferedReader.readLine()) != null) {
+			while ((line = bufferedReader.readLine()) != null) {
 
 				String[] tgg = line.split("\\-");
 				boolean check = false;
 
-				for(String x : tgg){
-					String tmp = MixedEncryption.staticReference.DecryptObject(x);
+				for (String x : tgg) {
+					String tmp = SecureEncryption.staticReference.DecryptObject(x);
 
-					if(tmp.equalsIgnoreCase("DD") && !check){
+					if (tmp.equalsIgnoreCase("DD") && !check) {
 						check = true;
-						continue;
-					}else if(check){
-						Date created = dateFormat.parse(MixedEncryption.staticReference.DecryptObject(x));
+					} else if (check) {
+						Date created = dateFormat.parse(SecureEncryption.staticReference.DecryptObject(x));
 						Date now = new Date();
 
 						long diff = (now.getTime() - created.getTime());
@@ -241,18 +255,14 @@ public class TwitterAccess
 			}
 
 			bufferedReader.close();
-		}catch (Exception e){
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
 		return tg;
 	}
 
-
-	private static File file = new File("tokens.store");
-	private static DateFormat dateFormat = new SimpleDateFormat("HH.mm.ss dd:MM:yyyy");
-
-	private static void writeAccessToken(AccessToken token) {
+	private static void writeAccessToken( AccessToken token ) {
 		try {
 			file.createNewFile();
 			String tmp = getEncryptionRow();
@@ -261,41 +271,41 @@ public class TwitterAccess
 			BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
 			Date date = new Date();
 
-			for(String t : tmp.split("")){
-				if(t.equalsIgnoreCase("1")){
-					bufferedWriter.write(MixedEncryption.staticReference.EncryptObject("DD") + "-" + MixedEncryption.staticReference.EncryptObject(dateFormat.format(date)));
+			for (String t : tmp.split("")) {
+				if (t.equalsIgnoreCase("1")) {
+					bufferedWriter.write(SecureEncryption.staticReference.EncryptObject("DD") + "-" + SecureEncryption.staticReference.EncryptObject(dateFormat.format(date)));
 					bufferedWriter.newLine();
 
-				}else if(t.equalsIgnoreCase("2")){
-					bufferedWriter.write(MixedEncryption.staticReference.EncryptObject("AT") + "-" + MixedEncryption.staticReference.EncryptObject(token.getToken()));
+				} else if (t.equalsIgnoreCase("2")) {
+					bufferedWriter.write(SecureEncryption.staticReference.EncryptObject("AT") + "-" + SecureEncryption.staticReference.EncryptObject(token.getToken()));
 					bufferedWriter.newLine();
 
-				}else if(t.equalsIgnoreCase("3")){
-					bufferedWriter.write(MixedEncryption.staticReference.EncryptObject("AS") + "-" + MixedEncryption.staticReference.EncryptObject(token.getTokenSecret()));
+				} else if (t.equalsIgnoreCase("3")) {
+					bufferedWriter.write(SecureEncryption.staticReference.EncryptObject("AS") + "-" + SecureEncryption.staticReference.EncryptObject(token.getTokenSecret()));
 					bufferedWriter.newLine();
 				}
 			}
 
 			bufferedWriter.close();
 
-		}catch (Exception e){
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
 	}
 
-	private static String getEncryptionRow(){
+	private static String getEncryptionRow() {
 		String temp = "";
 
 		ArrayList<Integer> ints = new ArrayList<>();
 
-		for(int i = 1; i < 4; i++)
+		for (int i = 1; i < 4; i++)
 			ints.add(i);
 
 		Collections.shuffle(ints);
 
-		for(Integer in : ints)
-		temp += Integer.toString(in);
+		for (Integer in : ints)
+			temp += Integer.toString(in);
 
 		return temp;
 	}

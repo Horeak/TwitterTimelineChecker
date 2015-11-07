@@ -4,8 +4,16 @@ import Utils.Action.Actions;
 
 public class TimelineCheckerObject {
 
-	public TimelineCheckerObject(String name, boolean specificUser, String userTimeLineID, String textToCheck, int hoursLimit, boolean notifyUser, Actions[] actions)
-	{
+	private String textToCheck;
+	private String userTimeLineID;
+	private String name;
+	private String idToNotify;
+	private int hoursLimit;
+	private boolean notifyUser;
+	private boolean specificUser;
+	private Actions[] actions;
+
+	public TimelineCheckerObject( String name, boolean specificUser, String userTimeLineID, String textToCheck, int hoursLimit, boolean notifyUser, Actions[] actions ) {
 		this.name = name;
 		this.userTimeLineID = userTimeLineID;
 		this.textToCheck = textToCheck;
@@ -18,39 +26,31 @@ public class TimelineCheckerObject {
 		this.actions = actions;
 	}
 
-	public TimelineCheckerObject(String name, boolean specificUser, String userTimeLineID, String textToCheck, int hoursLimit, boolean notifyUser, String idToNotify, Actions[] actions)
-	{
+	public TimelineCheckerObject( String name, boolean specificUser, String userTimeLineID, String textToCheck, int hoursLimit, boolean notifyUser, String idToNotify, Actions[] actions ) {
 		this(name, specificUser, userTimeLineID, textToCheck, hoursLimit, notifyUser, actions);
 		this.idToNotify = idToNotify;
 	}
 
-	private String textToCheck;
-	private String userTimeLineID;
-	private String name;
-	private String idToNotify;
-
-	private int hoursLimit;
-
-	private boolean notifyUser;
-	private boolean specificUser;
-
-	private Actions[] actions;
-
 	public String getName() {
 		return name;
 	}
+
 	public String getTextToCheck() {
 		return textToCheck;
 	}
+
 	public String getUserTimeLineID() {
 		return userTimeLineID;
 	}
+
 	public int getHoursLimit() {
 		return hoursLimit;
 	}
+
 	public boolean isNotifyUser() {
 		return notifyUser;
 	}
+
 	public Actions[] getActions() {
 		return actions;
 	}

@@ -1,11 +1,11 @@
 <ivy-module version="2.0">
     <info organisation="org.apache" module="JavaTwitter"/>
     <dependencies>
-		<dependency org="org.twitter4j" name="twitter4j-core" rev="4.0.4"/>
-		<dependency org="org.twitter4j" name="twitter4j-stream" rev="4.0.4"/>
-		<dependency org="org.twitter4j" name="twitter4j-async" rev="4.0.4"/>
-		<dependency org="org.twitter4j" name="twitter4j-media-support" rev="4.0.4"/>
-		<dependency org="org.twitter4j" name="twitter4j-examples" rev="4.0.4"/>
-		<dependency org="org.apache.commons" name="commons-lang3" rev="3.0.1"/>
+        <dependency org="org.twitter4j" name="twitter4j-core" rev="4.0.4"/>
+        <dependency org="org.twitter4j" name="twitter4j-stream" rev="4.0.4"/>
+        <dependency org="org.twitter4j" name="twitter4j-async" rev="4.0.4"/>
+        <dependency org="org.twitter4j" name="twitter4j-media-support" rev="4.0.4"/>
+        <dependency org="org.twitter4j" name="twitter4j-examples" rev="4.0.4"/>
+        <dependency org="org.apache.commons" name="commons-lang3" rev="3.0.1"/>
     </dependencies>
 </ivy-module>

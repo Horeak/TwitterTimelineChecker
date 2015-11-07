@@ -1,71 +1,70 @@
 <project xmlns:ivy="antlib:org.apache.ivy.ant" basedir="." default="test">
 
-<path id="build.classpath">
-  <fileset dir="lib">
-    <include name="**/*.jar"/>
-    <include name="**/*.zip"/>
-  </fileset>
-  <fileset dir="lLibs">
-    <include name="**/*.jar"/>
-    <include name="**/*.zip"/>
-  </fileset>
-</path>
+    <path id="build.classpath">
+        <fileset dir="lib">
+            <include name="**/*.jar"/>
+            <include name="**/*.zip"/>
+        </fileset>
+        <fileset dir="lLibs">
+            <include name="**/*.jar"/>
+            <include name="**/*.zip"/>
+        </fileset>
+    </path>
 
-   <target name="init" depends="resolve">
-      <property name="sourceDir" value="src"/>
-      <property name="outputDir" value="classes" />
-	  <property name="outputDirJar" value="output" />
-   </target>
-   
-   <target name="clean" depends="init">
-      <deltree dir="${outputDir}" />
-	  <deltree dir="${outputDirJar}" />
-   </target>
-   
-   <target name="prepare" depends="clean">
-    <mkdir dir="${outputDir}" />
-	<mkdir dir="${outputDirJar}" />
-   </target>
-   
-   <target name="compile" depends="prepare">
-	<javac destdir="${outputDir}">
-		<src path="${sourceDir}"/>
-		<classpath refid="build.classpath"/>
-	</javac>
-	
-	<jar destfile = "${outputDirJar}/JavaTwitter.jar" basedir = "${outputDir}">
-   
-	<zipgroupfileset dir="lib" includes="*.jar"/>
-   
-   <manifest>
-      <attribute name="Main-Class" value="Main.MainTwitter"/>
-	  <attribute name="Class-Path" value="build.classpath"/>
-   </manifest>
-   </jar>
-   
-	 <deltree dir="${outputDir}" />
-</target>
-   
-   
-   
-   <!-- Used to start build with travis CI -->
+    <target name="init" depends="resolve">
+        <property name="sourceDir" value="src"/>
+        <property name="outputDir" value="classes"/>
+        <property name="outputDirJar" value="output"/>
+    </target>
+
+    <target name="clean" depends="init">
+        <deltree dir="${outputDir}"/>
+        <deltree dir="${outputDirJar}"/>
+    </target>
+
+    <target name="prepare" depends="clean">
+        <mkdir dir="${outputDir}"/>
+        <mkdir dir="${outputDirJar}"/>
+    </target>
+
+    <target name="compile" depends="prepare">
+        <javac destdir="${outputDir}">
+            <src path="${sourceDir}"/>
+            <classpath refid="build.classpath"/>
+        </javac>
+
+        <jar destfile="${outputDirJar}/JavaTwitter.jar" basedir="${outputDir}">
+
+            <zipgroupfileset dir="lib" includes="*.jar"/>
+
+            <manifest>
+                <attribute name="Main-Class" value="Main.MainTwitter"/>
+                <attribute name="Class-Path" value="build.classpath"/>
+            </manifest>
+        </jar>
+
+        <deltree dir="${outputDir}"/>
+    </target>
+
+
+    <!-- Used to start build with travis CI -->
     <target name="test" depends="compile">
-	</target>	
-	
-	
-	<!-- ivy start -->
-	<!-- ivy to get dependencies and copy to project lib folder automatically -->
-	<target name="resolve" description="retrieve dependencies with ivy" depends="ivy">
-		<ivy:resolve  />
-		<ivy:retrieve sync="true" type="jar"/>
-	</target>
+    </target>
 
-	<!-- install ivy -->
-	<target name="ivy" description="Install ivy">
-		<mkdir dir="${user.home}/.ant/lib" />
-		<get dest="${user.home}/.ant/lib/ivy.jar" 
-			src="http://search.maven.org/remotecontent?filepath=org/apache/ivy/ivy/2.4.0-rc1/ivy-2.4.0-rc1.jar" />
-	</target>
-	<!-- ivy end -->
-	
+
+    <!-- ivy start -->
+    <!-- ivy to get dependencies and copy to project lib folder automatically -->
+    <target name="resolve" description="retrieve dependencies with ivy" depends="ivy">
+        <ivy:resolve/>
+        <ivy:retrieve sync="true" type="jar"/>
+    </target>
+
+    <!-- install ivy -->
+    <target name="ivy" description="Install ivy">
+        <mkdir dir="${user.home}/.ant/lib"/>
+        <get dest="${user.home}/.ant/lib/ivy.jar"
+             src="http://search.maven.org/remotecontent?filepath=org/apache/ivy/ivy/2.4.0-rc1/ivy-2.4.0-rc1.jar"/>
+    </target>
+    <!-- ivy end -->
+
 </project>

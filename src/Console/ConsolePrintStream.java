@@ -10,35 +10,35 @@ public class ConsolePrintStream extends PrintStream {
 
 	public JEditorPane textArea;
 
-	public ConsolePrintStream(JEditorPane textArea) {
-	super(new ConsoleOutputStream(), true);
+	public ConsolePrintStream( JEditorPane textArea ) {
+		super(new ConsoleOutputStream(), true);
 
 		this.textArea = textArea;
 	}
 
 	@Override
-	public void print(String s) {
+	public void print( String s ) {
 		super.print(s);
-			try {
-				final String text = s + "\n";
+		try {
+			final String text = s + "\n";
 
-				SwingUtilities.invokeLater(new Runnable() {
-					public void run() {
-						try {
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run() {
+					try {
 
-							if (textArea != null) {
-								textArea.getDocument().insertString(textArea.getDocument().getLength(), MessageFormatter.formatOutgoingLogMessage(text), null);
-							}
-
-						} catch (BadLocationException e) {
-							e.printStackTrace();
+						if (textArea != null) {
+							textArea.getDocument().insertString(textArea.getDocument().getLength(), MessageFormatter.formatOutgoingLogMessage(text), null);
 						}
-					}
-				});
 
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+					} catch (BadLocationException e) {
+						e.printStackTrace();
+					}
+				}
+			});
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
 	}
 }

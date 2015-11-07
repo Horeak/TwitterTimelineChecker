@@ -16,9 +16,10 @@ import java.io.PrintStream;
 
 public class ProgramWindow extends JPanel {
 
+	public static PrintStream stream = System.out;
+	public static JFrame frame = new JFrame("Twitter Timeline Checker");
 	private JTextPane textArea = new JTextPane();
 	private ConsolePrintStream taOutputStream = new ConsolePrintStream(textArea);
-	public static PrintStream stream = System.out;
 
 	public ProgramWindow() {
 		textArea.setEditable(false);
@@ -32,7 +33,7 @@ public class ProgramWindow extends JPanel {
 		textArea.setMinimumSize(size);
 		setLayout(new BorderLayout());
 
-		DefaultCaret caret = (DefaultCaret)textArea.getCaret();
+		DefaultCaret caret = (DefaultCaret) textArea.getCaret();
 		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
 
 		add(new JScrollPane(textArea, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED));
@@ -41,7 +42,6 @@ public class ProgramWindow extends JPanel {
 
 	}
 
-	public static JFrame frame = new JFrame("Twitter Timeline Checker");
 	public static void createAndShowGui() {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setPreferredSize(new Dimension(600, 500));
@@ -56,32 +56,32 @@ public class ProgramWindow extends JPanel {
 
 }
 
-class buttonArea{
+class buttonArea {
 
 	public static JPanel panel = new JPanel();
 	public static JScrollPane scrollPane = new JScrollPane(panel, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
-	public static Dimension buttonSize = new Dimension(170,40);
+	public static Dimension buttonSize = new Dimension(170, 40);
 
-	public buttonArea(){
+	public buttonArea() {
 		scrollPane.setPreferredSize(new Dimension(200, 220));
 		panel.setLayout(new WrapLayout());
 
 		addButtons();
 	}
 
-	public JScrollPane getScrollPane(){
+	public JScrollPane getScrollPane() {
 		return scrollPane;
 	}
 
-	public void addButton(TimelineCheckerObject object){
+	public void addButton( TimelineCheckerObject object ) {
 		JButton button = new JButton(object.getName());
 		button.setPreferredSize(buttonSize);
 
 		//Edit menu
 		button.addActionListener(new ActionListener() {
 			@Override
-			public void actionPerformed(ActionEvent e) {
+			public void actionPerformed( ActionEvent e ) {
 				JPanel panelX = new JPanel();
 				panelX.setLayout(new SpringLayout());
 
@@ -104,7 +104,7 @@ class buttonArea{
 				userNameID.setEditable(false);
 				specificUser.addActionListener(new ActionListener() {
 					@Override
-					public void actionPerformed(ActionEvent e) {
+					public void actionPerformed( ActionEvent e ) {
 						userNameID.setEditable(specificUser.isSelected());
 					}
 				});
@@ -123,7 +123,10 @@ class buttonArea{
 				JSpinner spinnerHours = new JSpinner(new SpinnerNumberModel(24, 0, Integer.MAX_VALUE, 1));
 				spinnerHours.setMaximumSize(new Dimension(20, 20));
 
-				JLabel lHours = new JLabel("Max hours: ", JLabel.TRAILING);	panelX.add(lHours);lHours.setLabelFor(spinnerHours);panelX.add(spinnerHours);
+				JLabel lHours = new JLabel("Max hours: ", JLabel.TRAILING);
+				panelX.add(lHours);
+				lHours.setLabelFor(spinnerHours);
+				panelX.add(spinnerHours);
 
 				JCheckBox notifyUser = new JCheckBox();
 				JLabel lNotifyUser = new JLabel("Notify user: ", JLabel.TRAILING);
@@ -133,12 +136,14 @@ class buttonArea{
 
 				notifyUser.addActionListener(new ActionListener() {
 					@Override
-					public void actionPerformed(ActionEvent e) {
+					public void actionPerformed( ActionEvent e ) {
 						idToNotify.setEditable(notifyUser.isSelected());
 					}
 				});
 
-				JLabel lIdToNotify = new JLabel("User to notify: @", JLabel.TRAILING); panelX.add(lIdToNotify); lIdToNotify.setLabelFor(idToNotify);
+				JLabel lIdToNotify = new JLabel("User to notify: @", JLabel.TRAILING);
+				panelX.add(lIdToNotify);
+				lIdToNotify.setLabelFor(idToNotify);
 				panelX.add(idToNotify);
 
 				JCheckBox retweet = new JCheckBox();
@@ -157,7 +162,7 @@ class buttonArea{
 
 				delete.addActionListener(new ActionListener() {
 					@Override
-					public void actionPerformed(ActionEvent e) {
+					public void actionPerformed( ActionEvent e ) {
 
 						MainTwitter.timelineCheckers.remove(object);
 						panel.remove(button);
@@ -182,7 +187,7 @@ class buttonArea{
 
 				manualUpdate.addActionListener(new ActionListener() {
 					@Override
-					public void actionPerformed(ActionEvent e) {
+					public void actionPerformed( ActionEvent e ) {
 						StatusHandler.performManualCheck(object);
 					}
 				});
@@ -207,11 +212,9 @@ class buttonArea{
 				boolean r = false, f = false;
 
 				for (Actions act : object.getActions()) {
-					if (act == Actions.FAVORITE)
-						f = true;
+					if (act == Actions.FAVORITE) f = true;
 
-					if (act == Actions.RETWEET)
-						r = true;
+					if (act == Actions.RETWEET) r = true;
 				}
 
 				retweet.setSelected(r);
@@ -224,11 +227,11 @@ class buttonArea{
 
 					String textToChecked = textToCheck.getText();
 
-					int Hours = (Integer)spinnerHours.getValue();
+					int Hours = (Integer) spinnerHours.getValue();
 
 					boolean notfUser = notifyUser.isSelected(), retw = retweet.isSelected(), fav = favorite.isSelected();
 
-					Actions[] act = new Actions[]{retw ? Actions.RETWEET : null, fav ? Actions.FAVORITE : null};
+					Actions[] act = new Actions[]{ retw ? Actions.RETWEET : null, fav ? Actions.FAVORITE : null };
 
 					MainTwitter.timelineCheckers.remove(object);
 
@@ -250,8 +253,8 @@ class buttonArea{
 	}
 
 
-	public void addButtons(){
-		for(TimelineCheckerObject timelineChecker : MainTwitter.timelineCheckers){
+	public void addButtons() {
+		for (TimelineCheckerObject timelineChecker : MainTwitter.timelineCheckers) {
 			addButton(timelineChecker);
 		}
 
@@ -261,7 +264,7 @@ class buttonArea{
 		//Add rule menu
 		button.addActionListener(new ActionListener() {
 			@Override
-			public void actionPerformed(ActionEvent e) {
+			public void actionPerformed( ActionEvent e ) {
 				JPanel panel = new JPanel();
 				panel.setLayout(new SpringLayout());
 
@@ -270,7 +273,9 @@ class buttonArea{
 				idToNotify.setPreferredSize(new Dimension(120, 20));
 				idToNotify.setEditable(false);
 
-				JLabel lName = new JLabel("Name: ", JLabel.TRAILING); panel.add(lName); lName.setLabelFor(nameField);
+				JLabel lName = new JLabel("Name: ", JLabel.TRAILING);
+				panel.add(lName);
+				lName.setLabelFor(nameField);
 				panel.add(nameField);
 
 				JCheckBox specificUser = new JCheckBox();
@@ -282,42 +287,57 @@ class buttonArea{
 				userNameID.setEditable(false);
 				specificUser.addActionListener(new ActionListener() {
 					@Override
-					public void actionPerformed(ActionEvent e) {
+					public void actionPerformed( ActionEvent e ) {
 						userNameID.setEditable(specificUser.isSelected());
 					}
 				});
 
-				JLabel lUserName = new JLabel("User id for timeline: @", JLabel.TRAILING); panel.add(lUserName); lUserName.setLabelFor(userNameID);
+				JLabel lUserName = new JLabel("User id for timeline: @", JLabel.TRAILING);
+				panel.add(lUserName);
+				lUserName.setLabelFor(userNameID);
 				panel.add(userNameID);
 
-				JLabel lTextToCheck = new JLabel("Text to check for: ", JLabel.TRAILING); panel.add(lTextToCheck); lTextToCheck.setLabelFor(textToCheck);
+				JLabel lTextToCheck = new JLabel("Text to check for: ", JLabel.TRAILING);
+				panel.add(lTextToCheck);
+				lTextToCheck.setLabelFor(textToCheck);
 				panel.add(textToCheck);
 
 				JSpinner spinnerHours = new JSpinner(new SpinnerNumberModel(24, 0, Integer.MAX_VALUE, 1));
 				spinnerHours.setMaximumSize(new Dimension(20, 20));
 
-				JLabel lHours = new JLabel("Max hours: ", JLabel.TRAILING);	panel.add(lHours);lHours.setLabelFor(spinnerHours);panel.add(spinnerHours);
+				JLabel lHours = new JLabel("Max hours: ", JLabel.TRAILING);
+				panel.add(lHours);
+				lHours.setLabelFor(spinnerHours);
+				panel.add(spinnerHours);
 
 				JCheckBox notifyUser = new JCheckBox();
 				notifyUser.addActionListener(new ActionListener() {
 					@Override
-					public void actionPerformed(ActionEvent e) {
+					public void actionPerformed( ActionEvent e ) {
 						idToNotify.setEditable(notifyUser.isSelected());
 					}
 				});
 
-				JLabel lNotifyUser = new JLabel("Notify user: ", JLabel.TRAILING); panel.add(lNotifyUser); lNotifyUser.setLabelFor(notifyUser);
+				JLabel lNotifyUser = new JLabel("Notify user: ", JLabel.TRAILING);
+				panel.add(lNotifyUser);
+				lNotifyUser.setLabelFor(notifyUser);
 				panel.add(notifyUser);
 
-				JLabel lIdToNotify = new JLabel("User to notify: @", JLabel.TRAILING); panel.add(lIdToNotify); lIdToNotify.setLabelFor(idToNotify);
+				JLabel lIdToNotify = new JLabel("User to notify: @", JLabel.TRAILING);
+				panel.add(lIdToNotify);
+				lIdToNotify.setLabelFor(idToNotify);
 				panel.add(idToNotify);
 
 				JCheckBox retweet = new JCheckBox();
-				JLabel lRetweet = new JLabel("Retweet: ", JLabel.TRAILING); panel.add(lRetweet); lRetweet.setLabelFor(retweet);
+				JLabel lRetweet = new JLabel("Retweet: ", JLabel.TRAILING);
+				panel.add(lRetweet);
+				lRetweet.setLabelFor(retweet);
 				panel.add(retweet);
 
 				JCheckBox favorite = new JCheckBox();
-				JLabel lFavorite = new JLabel("Favorit: ", JLabel.TRAILING); panel.add(lFavorite); lFavorite.setLabelFor(favorite);
+				JLabel lFavorite = new JLabel("Favorit: ", JLabel.TRAILING);
+				panel.add(lFavorite);
+				lFavorite.setLabelFor(favorite);
 				panel.add(favorite);
 
 
@@ -330,13 +350,13 @@ class buttonArea{
 
 					String textToChecked = textToCheck.getText();
 
-					int Hours = (Integer)spinnerHours.getValue();
+					int Hours = (Integer) spinnerHours.getValue();
 
 					boolean notfUser = notifyUser.isSelected(), retw = retweet.isSelected(), fav = favorite.isSelected();
 
-					Actions[] act = new Actions[]{retw ? Actions.RETWEET : null, fav ? Actions.FAVORITE : null};
+					Actions[] act = new Actions[]{ retw ? Actions.RETWEET : null, fav ? Actions.FAVORITE : null };
 
-					TimelineCheckerObject object = new TimelineCheckerObject(name, specificUser.isSelected(), id , textToChecked, Hours, notfUser, idToNotify.getText(), act);
+					TimelineCheckerObject object = new TimelineCheckerObject(name, specificUser.isSelected(), id, textToChecked, Hours, notfUser, idToNotify.getText(), act);
 					MainTwitter.timelineCheckers.add(object);
 					addButton(object);
 

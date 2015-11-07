@@ -14,26 +14,24 @@ import java.util.concurrent.TimeUnit;
 
 public class StatusHandler {
 
-	public static boolean hasFavorite(TimelineCheckerObject checkerObject, Status status){
-		for(Actions act : getActions(checkerObject, status)){
-			if(act == Actions.FAVORITE)
-				return true;
+	public static boolean hasFavorite( TimelineCheckerObject checkerObject, Status status ) {
+		for (Actions act : getActions(checkerObject, status)) {
+			if (act == Actions.FAVORITE) return true;
 		}
 
 		return false;
 	}
 
-	public static boolean hasRetweet(TimelineCheckerObject checkerObject, Status status){
-		for(Actions act : getActions(checkerObject, status)){
-			if(act == Actions.RETWEET)
-				return true;
+	public static boolean hasRetweet( TimelineCheckerObject checkerObject, Status status ) {
+		for (Actions act : getActions(checkerObject, status)) {
+			if (act == Actions.RETWEET) return true;
 		}
 
 		return false;
 	}
 
 
-	public static Actions[] getActions(TimelineCheckerObject checkerObject, Status status){
+	public static Actions[] getActions( TimelineCheckerObject checkerObject, Status status ) {
 
 		Actions[] actionses;
 		boolean fav = false, re = false;
@@ -49,27 +47,27 @@ public class StatusHandler {
 			}
 
 		}
-			actionses = new Actions[]{fav ? Actions.FAVORITE : null, re ? Actions.RETWEET : null};
+		actionses = new Actions[]{ fav ? Actions.FAVORITE : null, re ? Actions.RETWEET : null };
 
-			return actionses;
+		return actionses;
 	}
 
-	public static void performManualCheck(TimelineCheckerObject object){
+	public static void performManualCheck( TimelineCheckerObject object ) {
 		System.out.println("Performing manual check on rule: " + object.getName());
 
 		try {
-			if(object.isSpecificUser()){
-			for (Status stat : getTimelineFromUserAndDate(object, MainTwitter.twitter)) {
-				if (StatusHandler.validStatus(stat, object)) {
+			if (object.isSpecificUser()) {
+				for (Status stat : getTimelineFromUserAndDate(object, MainTwitter.twitter)) {
+					if (StatusHandler.validStatus(stat, object)) {
 
-					if (object.isNotifyUser())
-						MainTwitter.twitter.sendDirectMessage(object.getIdToNotify(), MessageFormatter.notifyStringFormat(object, stat));
+						if (object.isNotifyUser())
+							MainTwitter.twitter.sendDirectMessage(object.getIdToNotify(), MessageFormatter.notifyStringFormat(object, stat));
 
-					ActionUtils.performActions(object, stat, MainTwitter.twitter);
+						ActionUtils.performActions(object, stat, MainTwitter.twitter);
 
+					}
 				}
-			}
-			}else{
+			} else {
 				for (Status stat : MainTwitter.twitter.getHomeTimeline()) {
 					if (StatusHandler.validStatus(stat, object)) {
 
@@ -81,17 +79,17 @@ public class StatusHandler {
 					}
 				}
 			}
-		}catch (Exception e){
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
 
-	public static ArrayList<Status> getTimelineFromUserAndDate(TimelineCheckerObject object, Twitter twitter) throws Exception{
+	public static ArrayList<Status> getTimelineFromUserAndDate( TimelineCheckerObject object, Twitter twitter ) throws Exception {
 		ArrayList<Status> list = new ArrayList<>();
 		ResponseList<Status> tempList = twitter.getUserTimeline(object.getUserTimeLineID());
 
-		for(Status stat : tempList){
+		for (Status stat : tempList) {
 			Date start = stat.getCreatedAt();
 			Date now = new Date();
 
@@ -106,36 +104,57 @@ public class StatusHandler {
 				valid = true;
 			}
 
-			if(valid)
-				list.add(stat);
+			if (valid) list.add(stat);
 		}
 
 		return list;
 	}
 
-	public static boolean validStatus(Status stat, TimelineCheckerObject timelineChecker){
+	public static boolean validStatus( Status stat, TimelineCheckerObject timelineChecker ) {
 		boolean bool = true;
 
-		if(!timelineChecker.isSpecificUser() || timelineChecker.isSpecificUser() && timelineChecker.getUserTimeLineID().equals(stat.getUser().getScreenName()))
-		if(hasFavorite(timelineChecker, stat) || hasRetweet(timelineChecker, stat)) {
-			if (!stat.isRetweet() && stat.getInReplyToScreenName() == null) {
-				boolean fav = false, re = false;
+		if (!timelineChecker.isSpecificUser() || timelineChecker.isSpecificUser() && timelineChecker.getUserTimeLineID().equals(stat.getUser().getScreenName()))
+			if (hasFavorite(timelineChecker, stat) || hasRetweet(timelineChecker, stat)) {
+				if (!stat.isRetweet() && stat.getInReplyToScreenName() == null) {
+					boolean fav = false, re = false;
 
-				for (Actions act : timelineChecker.getActions()) {
-					if (act == Actions.RETWEET) re = true;
-					if (act == Actions.FAVORITE) fav = true;
-				}
+					for (Actions act : timelineChecker.getActions()) {
+						if (act == Actions.RETWEET) re = true;
+						if (act == Actions.FAVORITE) fav = true;
+					}
 
-				if (fav || re) {
-					if (fav && !stat.isFavorited() || re && !stat.isRetweeted()) {
-						String text = timelineChecker.getTextToCheck();
+					if (fav || re) {
+						if (fav && !stat.isFavorited() || re && !stat.isRetweeted()) {
+							String text = timelineChecker.getTextToCheck();
 
-						if (text.contains("||")) {
-							String[] tt = text.split("\\|\\|");
-							for (String tg : tt) {
+							if (text.contains("||")) {
+								String[] tt = text.split("\\|\\|");
+								for (String tg : tt) {
 
-								if (tg.contains("&&")) {
-									String[] ttt = tg.split("\\&\\&");
+									if (tg.contains("&&")) {
+										String[] ttt = tg.split("\\&\\&");
+
+										for (String tgg : ttt) {
+											bool = stat.getText().toLowerCase().contains(tgg.toLowerCase());
+										}
+
+										if (bool) {
+											return true;
+										} else {
+											continue;
+										}
+
+									} else {
+										bool = stat.getText().toLowerCase().contains(tg.toLowerCase());
+										if (bool) {
+											return true;
+										}
+									}
+
+								}
+							} else {
+								if (text.contains("&&")) {
+									String[] ttt = text.split("\\&\\&");
 
 									for (String tgg : ttt) {
 										bool = stat.getText().toLowerCase().contains(tgg.toLowerCase());
@@ -143,40 +162,18 @@ public class StatusHandler {
 
 									if (bool) {
 										return true;
-									} else {
-										continue;
 									}
 
 								} else {
-									bool = stat.getText().toLowerCase().contains(tg.toLowerCase());
-									if (bool) {
-										return true;
-									}
+									return stat.getText().toLowerCase().contains(text.toLowerCase());
 								}
-
-							}
-						} else {
-							if (text.contains("&&")) {
-								String[] ttt = text.split("\\&\\&");
-
-								for (String tgg : ttt) {
-									bool = stat.getText().toLowerCase().contains(tgg.toLowerCase());
-								}
-
-								if (bool) {
-									return true;
-								}
-
-							} else {
-								return stat.getText().toLowerCase().contains(text.toLowerCase());
 							}
 						}
-					}
 
-					return bool;
+						return bool;
+					}
 				}
 			}
-		}
 
 		return false;
 	}
